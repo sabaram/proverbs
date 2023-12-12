@@ -1,0 +1,132 @@
+class Node {
+    constructor(proverb) {
+        this.proverb = proverb;
+        this.left = null;
+        this.right = null;
+        this.height = 1;
+    }
+}
+
+class AVLTree {
+    constructor() {
+        this.root = null;
+    }
+
+    // Helper function to get the height of a node
+    getHeight(node) {
+        if (!node) return 0;
+        return node.height;
+    }
+
+    // Helper function to get the balance factor of a node
+    getBalanceFactor(node) {
+        if (!node) return 0;
+        return this.getHeight(node.left) - this.getHeight(node.right);
+    }
+
+    // Helper function to perform a right rotation
+    rightRotate(y) {
+        const x = y.left;
+        const T2 = x.right;
+
+        // Perform rotation
+        x.right = y;
+        y.left = T2;
+
+        // Update heights
+        y.height = Math.max(this.getHeight(y.left), this.getHeight(y.right)) + 1;
+        x.height = Math.max(this.getHeight(x.left), this.getHeight(x.right)) + 1;
+
+        return x;
+    }
+
+    // Helper function to perform a left rotation
+    leftRotate(x) {
+        const y = x.right;
+        const T2 = y.left;
+
+        // Perform rotation
+        y.left = x;
+        x.right = T2;
+
+        // Update heights
+        x.height = Math.max(this.getHeight(x.left), this.getHeight(x.right)) + 1;
+        y.height = Math.max(this.getHeight(y.left), this.getHeight(y.right)) + 1;
+
+        return y;
+    }
+
+    // Helper function to insert a proverb into the AVL tree
+    insertNode(node, proverb) {
+        if (!node) return new Node(proverb);
+
+        // Insert node in BST manner
+        if (proverb.chapter < node.proverb.chapter) {
+            node.left = this.insertNode(node.left, proverb);
+        } else if (proverb.chapter > node.proverb.chapter) {
+            node.right = this.insertNode(node.right, proverb);
+        } else {
+            // Handle duplicate chapters (if needed)
+        }
+
+        // Update height of current node
+        node.height = 1 + Math.max(this.getHeight(node.left), this.getHeight(node.right));
+
+        // Get the balance factor to check if the node became unbalanced
+        const balance = this.getBalanceFactor(node);
+
+        // Left Left Case
+        if (balance > 1 && proverb.chapter < node.left.proverb.chapter) {
+            return this.rightRotate(node);
+        }
+
+        // Right Right Case
+        if (balance < -1 && proverb.chapter > node.right.proverb.chapter) {
+            return this.leftRotate(node);
+        }
+
+        // Left Right Case
+        if (balance > 1 && proverb.chapter > node.left.proverb.chapter) {
+            node.left = this.leftRotate(node.left);
+            return this.rightRotate(node);
+        }
+
+        // Right Left Case
+        if (balance < -1 && proverb.chapter < node.right.proverb.chapter) {
+            node.right = this.rightRotate(node.right);
+            return this.leftRotate(node);
+        }
+
+        return node;
+    }
+
+    // Public method to insert a proverb into the AVL tree
+    insert(proverb) {
+        this.root = this.insertNode(this.root, proverb);
+    }
+
+    // In-order traversal of the AVL tree
+    inOrderTraversal(node = this.root) {
+        if (node) {
+            this.inOrderTraversal(node.left);
+            console.log(`Proverb ${node.proverb.chapter}:${node.proverb.verse} - ${node.proverb.text}`);
+            this.inOrderTraversal(node.right);
+        }
+    }
+}
+
+// Usage:
+
+const avlTree = new AVLTree();
+
+// Populate AVL tree with Proverbs
+const proverbs = [
+    // Your array of Proverbs objects here
+];
+
+proverbs.forEach(proverb => {
+    avlTree.insert(proverb);
+});
+
+// Display Proverbs using in-order traversal
+avlTree.inOrderTraversal();
